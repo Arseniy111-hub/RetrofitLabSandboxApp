@@ -5,5 +5,6 @@ enum class Destination(
 ) {
     POST(route = Screens.Post.route),
     IMAGE(route = Screens.Image.route),
-    WEATHER(route = Screens.Weather.route)
+    WEATHER(route = Screens.Weather.route),
+    LOGS(route = Screens.LogsScreen.route)
 }

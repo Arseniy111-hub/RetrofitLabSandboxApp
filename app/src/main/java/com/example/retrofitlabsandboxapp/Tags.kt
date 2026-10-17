@@ -1,7 +1,7 @@
 package com.example.retrofitlabsandboxapp
 
 enum class Tags(
-    val tag: String
+    val tagName: String
 ) {
     MAIN("MAIN"),
     VIEWMODEL("VIEWMODEL")

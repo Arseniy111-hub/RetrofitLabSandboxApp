@@ -24,6 +24,19 @@ class PostViewModel : ViewModel() {
     private val _ps = MutableStateFlow(PostState())
     val ps = _ps.asStateFlow()
 
+    private fun writeLog(message: String, tag: Tags) {
+        onIntent(
+            AddLog(
+                tag.tagName
+                        + " $message "
+                        + SimpleDateFormat(
+                    "dd.MM.yyyy HH:mm:ss ", Locale.getDefault()
+                )
+                    .format(Date())
+            )
+        )
+    }
+
     fun onIntent(intent: PostIntent) {
         when (intent) {
             is UpdateCurrentId -> {
@@ -46,51 +59,28 @@ class PostViewModel : ViewModel() {
                             else RetrofitInstance.api.getAllPosts()
 
                             if (response.isSuccessful) {
+                                writeLog("Response is successful", Tags.VIEWMODEL)
+
                                 onIntent(UpdateLoadingState(false))
                                 _ps.update {
                                     it.copy(
                                         posts = response.body() ?: emptyList()
                                     )
                                 }
+
                             } else {
                                 onIntent(UpdateLoadingState(false))
-                                onIntent(
-                                    AddLog(
-                                        Tags
-                                            .VIEWMODEL.tag
-                                                + "Response is not successful"
-                                                + SimpleDateFormat(
-                                            "dd.MM.yyyy HH:mm:ss", Locale.getDefault()
-                                        )
-                                            .format(Date())
-                                    )
-                                )
+                                writeLog("Response is not successful", Tags.VIEWMODEL)
                             }
                         } catch (e: Exception) {
-                            onIntent(
-                                AddLog(
-                                    Tags
-                                        .VIEWMODEL.tag
-                                            + e.message
-                                            + SimpleDateFormat(
-                                        "dd.MM.yyyy HH:mm:ss", Locale.getDefault()
-                                    )
-                                        .format(Date())
-                                )
-                            )
+                            writeLog(e.message.toString(), Tags.VIEWMODEL)
+
+                        } finally {
+                            writeLog("Response was finished", Tags.VIEWMODEL)
                         }
+
                     } else {
-                        onIntent(
-                            AddLog(
-                                Tags
-                                    .VIEWMODEL.tag
-                                        + "Query is blank"
-                                        + SimpleDateFormat(
-                                    "dd.MM.yyyy HH:mm:ss", Locale.getDefault()
-                                )
-                                    .format(Date())
-                            )
-                        )
+                        writeLog("Query is blank", Tags.VIEWMODEL)
                     }
                 }
 

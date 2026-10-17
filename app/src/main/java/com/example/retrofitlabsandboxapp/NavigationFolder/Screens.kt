@@ -13,5 +13,6 @@ sealed class Screens(val route: String) {
     object FullScreenPost : Screens("postFullScreen/{postId}") {
         fun postRoute(postId: Int) = "postFullScreen/$postId"
     }
+    object LogsScreen : Screens("logsScreen")
 
 }

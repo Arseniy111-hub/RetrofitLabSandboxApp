@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.retrofitlabsandboxapp.ScreensFolder.FullScreenPost
 import com.example.retrofitlabsandboxapp.ScreensFolder.Image
+import com.example.retrofitlabsandboxapp.ScreensFolder.LogsScreen
 import com.example.retrofitlabsandboxapp.ScreensFolder.Post
 import com.example.retrofitlabsandboxapp.ScreensFolder.Weather
 import com.example.retrofitlabsandboxapp.mvi.image.ImageViewModel
@@ -76,6 +77,15 @@ fun Navigation(
             route = Screens.Weather.route
         ) {
             Weather()
+        }
+        composable(
+            route = Screens.LogsScreen.route
+        ) {
+            LogsScreen(
+                onBack = { navController.popBackStack() },
+                onIntent = { pvm.onIntent(it) },
+                state = ps.value
+            )
         }
 
     }
