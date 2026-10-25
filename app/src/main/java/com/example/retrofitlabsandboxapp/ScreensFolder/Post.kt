@@ -58,7 +58,7 @@ fun Post(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    onIntent(PostIntent.FetchFilteredPosts(state.filterType.ordinal))
+                    onIntent(PostIntent.FetchFilteredPosts(state.filterType.userId))
                 }
             ) {
                 Icon(
@@ -114,6 +114,23 @@ fun Post(
                 )
             }
 
+            if (state.errorMessage.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentAlignment = Alignment.TopCenter,
+
+                    ) {
+                    Text(
+                        text = state.errorMessage,
+                        fontSize = 20.sp,
+
+                        )
+                }
+
+            }
+
         }
 
         LazyVerticalStaggeredGrid(
@@ -126,6 +143,7 @@ fun Post(
             horizontalArrangement = Arrangement.spacedBy(5.dp)
 
         ) {
+
             items(state.posts, key = { it.id }) { post ->
                 Card(
                     modifier = Modifier
@@ -133,6 +151,7 @@ fun Post(
                             onClick = {
 
                                 onFullScreen(post.id)
+
                             }
                         )
                         .size(width = 200.dp, height = 100.dp),

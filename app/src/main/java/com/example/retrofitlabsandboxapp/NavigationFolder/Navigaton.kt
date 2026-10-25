@@ -1,6 +1,7 @@
 package com.example.retrofitlabsandboxapp.NavigationFolder
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -59,8 +60,10 @@ fun Navigation(
                 }
             )
         ) {
-            val postId = it.arguments?.getInt("postId") ?: -1
-            pvm.onIntent(PostIntent.UpdateCurrentId(postId))
+            val postId = it.arguments?.getInt("postId")
+            LaunchedEffect(postId) {
+                pvm.onIntent(PostIntent.FetchPostOnId(postId ?: -1))
+            }
 
             FullScreenPost(
                 onIntent = { intent -> pvm.onIntent(intent) },

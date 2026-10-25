@@ -14,5 +14,6 @@ data class PostState(
     val logs: List<String> = emptyList(),
     val posts: List<PostObject> = emptyList(),
     val restoredPost: PostObject? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val errorMessage: String = ""
 )

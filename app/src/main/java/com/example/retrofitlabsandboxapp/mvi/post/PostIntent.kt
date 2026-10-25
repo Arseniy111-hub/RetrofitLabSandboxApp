@@ -11,5 +11,6 @@ sealed interface PostIntent {
     data class UpdateRestoredPost(val restoredPost: PostObject?) : PostIntent
     data class UpdateFilterType(val filterType: FilterType) : PostIntent
     data class UpdateLoadingState(val isLoading: Boolean) : PostIntent
+    data class FetchPostOnId(val postId: Int) : PostIntent
 
 }
