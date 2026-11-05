@@ -3,6 +3,7 @@ package com.example.retrofitlabsandboxapp.mvi.post
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.retrofitlabsandboxapp.RetrofidFolder.RetrofitInstance
+import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostObject
 import com.example.retrofitlabsandboxapp.Tags
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.AddLog
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.FetchFilteredPosts
@@ -11,6 +12,7 @@ import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateCurrentId
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateFilterType
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateLoadingState
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateRestoredPost
+import com.example.retrofitlabsandboxapp.writeLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,29 +20,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlin.random.Random
 
 class PostViewModel : ViewModel() {
     private var filteredPostsJob: Job? = null
     private var openPostJob: Job? = null
+    private var createPostJob: Job? = null
     private val _postState = MutableStateFlow(PostState())
-    val ps = _postState.asStateFlow()
+    val postState = _postState.asStateFlow()
+//    private val _postsState = MutableStateFlow(emptyList<PostObject>())
+//        val postsState = _postState.asStateFlow()
 
-    private fun writeLog(message: String, tag: Tags) {
-        onIntent(
-            AddLog(
-                tag.tagName
-                        + " $message "
-                        + SimpleDateFormat(
-                    "dd.MM.yyyy HH:mm:ss ", Locale.getDefault()
-                )
-                    .format(Date())
-            )
-        )
-
-    }
 
     fun onIntent(intent: PostIntent) {
         when (intent) {
@@ -68,7 +58,9 @@ class PostViewModel : ViewModel() {
                         val response = RetrofitInstance.api.searchPost(query)
 
                         if (response.isSuccessful) {
-                            writeLog("Response is successful", Tags.VIEWMODEL)
+                            writeLog(
+                                "Response is successful", Tags.VIEWMODEL
+                            )
 
                             onIntent(UpdateLoadingState(false))
                             _postState.update {
@@ -119,7 +111,43 @@ class PostViewModel : ViewModel() {
             }
 
             is SavePost -> {
-                //Todo("Later to finish writing")
+                val userPost = PostObject(
+                    body = _postState.value.userBody,
+                    id = Random.nextInt(-999999999, -1),
+                    title = _postState.value.userTitle,
+                    userId = _postState.value.userId.toInt()
+                )
+                _postState.update {
+                    it.copy(
+                        userPosts = it.userPosts + userPost
+                    )
+                }
+                createPostJob?.cancel()
+                createPostJob = viewModelScope.launch {
+
+                    try {
+                        val response = RetrofitInstance.api.createPost(userPost)
+                        if (response.isSuccessful) {
+
+
+                            writeLog(
+                                "was successful created post: ${response.body().toString()}." +
+                                        "Code: ${response.code()}", Tags.VIEWMODEL
+                            )
+                        } else {
+                            writeLog("response isn't successful", Tags.VIEWMODEL)
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        writeLog(e.message.toString(), Tags.VIEWMODEL)
+
+                    }
+
+
+                }
+
+
             }
 
             is UpdateRestoredPost -> {
@@ -145,8 +173,21 @@ class PostViewModel : ViewModel() {
             }
 
             is PostIntent.FetchPostOnId -> {
-                onIntent(UpdateLoadingState(true))
                 openPostJob?.cancel()
+
+                // Отрицательный id — это пост пользователя, на сервере его нет
+                if (intent.postId < 0) {
+                    val localPost = _postState.value.userPosts.find { it.id == intent.postId }
+                    _postState.update {
+                        it.copy(
+                            restoredPost = localPost,
+                            isLoading = false
+                        )
+                    }
+                    return
+                }
+
+                onIntent(UpdateLoadingState(true))
                 _postState.update {
                     it.copy(restoredPost = null)
                 }
@@ -182,14 +223,51 @@ class PostViewModel : ViewModel() {
 
                     } finally {
                         writeLog("Response was finished", Tags.VIEWMODEL)
-
-
                     }
 
                 }
 
             }
 
+            is PostIntent.UpdatePostFormFlag -> {
+                _postState.update {
+                    it.copy(postFormIsOpen = intent.postFormIsOpen)
+                }
+            }
+
+            is PostIntent.UpdateUserBody -> {
+                _postState.update {
+                    it.copy(
+                        userBody = intent.userBody
+                    )
+                }
+            }
+
+            is PostIntent.UpdateUserId -> {
+                _postState.update {
+                    it.copy(
+                        userId = intent.userId
+                    )
+                }
+            }
+
+            is PostIntent.UpdateUserTitle -> {
+                _postState.update {
+                    it.copy(
+                        userTitle = intent.userTitle
+                    )
+                }
+            }
+
+            PostIntent.ClearUserForm -> {
+                _postState.update {
+                    it.copy(
+                        userId = "",
+                        userBody = "",
+                        userTitle = ""
+                    )
+                }
+            }
         }
 
     }

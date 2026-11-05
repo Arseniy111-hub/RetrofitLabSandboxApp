@@ -1,4 +1,4 @@
-package com.example.retrofitlabsandboxapp.ScreensFolder
+package com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -58,7 +58,7 @@ fun Post(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    onIntent(PostIntent.FetchFilteredPosts(state.filterType.userId))
+                    onIntent(PostIntent.UpdatePostFormFlag(true))
                 }
             ) {
                 Icon(
@@ -82,6 +82,7 @@ fun Post(
                                 onClick = {
                                     onIntent(PostIntent.UpdateFilterType(type))
                                     rememberTabIndex = index
+                                    onIntent(PostIntent.FetchFilteredPosts(type.userId))
                                 },
                                 selected = index == rememberTabIndex
                             ) {
@@ -99,6 +100,7 @@ fun Post(
 
     ) { paddingValues ->
 
+
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -106,6 +108,12 @@ fun Post(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (state.postFormIsOpen) {
+                PostForm(
+                    onIntent = onIntent,
+                    state = state
+                )
+            }
             if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(70.dp),
@@ -149,9 +157,7 @@ fun Post(
                     modifier = Modifier
                         .clickable(
                             onClick = {
-
                                 onFullScreen(post.id)
-
                             }
                         )
                         .size(width = 200.dp, height = 100.dp),
@@ -169,7 +175,48 @@ fun Post(
 
                         }
                         Box(
-                            //contentAlignment = Alignment.TopCenter,
+
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(5.dp),
+
+                            ) {
+                            Text(
+                                "Title:\n" + post.title,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+
+                }
+            }
+
+            items(state.userPosts, key = { it.id }) { post ->
+                Card(
+                    modifier = Modifier
+                        .clickable(
+                            onClick = {
+                                onFullScreen(post.id)
+                            }
+                        )
+                        .size(width = 200.dp, height = 100.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(5.dp)
+                        ) {
+                            Text("User id: " + post.userId.toString())
+
+                        }
+                        Box(
+
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(5.dp),

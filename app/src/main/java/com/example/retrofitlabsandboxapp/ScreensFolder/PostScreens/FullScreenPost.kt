@@ -1,4 +1,4 @@
-package com.example.retrofitlabsandboxapp.ScreensFolder
+package com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,19 +34,12 @@ fun FullScreenPost(
     state: PostState,
     onBack: () -> Boolean
 ) {
-//    LaunchedEffect(state.currentPostId) {
-//        if (state.currentPostId != -1) {
-//            val restoredPost = state.posts.find { it.id == state.currentPostId }
-//            onIntent(PostIntent.UpdateRestoredPost(restoredPost))
-//        }
-//    }
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(state.currentTitle) },
+                title = { Text("Detail screen") },
                 navigationIcon = {
                     IconButton(onClick = {
                         onBack()
@@ -82,7 +75,6 @@ fun FullScreenPost(
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    //.padding(paddingValues)
                     .padding(16.dp)
             ) {
 

@@ -4,5 +4,6 @@ enum class Tags(
     val tagName: String
 ) {
     MAIN("MAIN"),
-    VIEWMODEL("VIEWMODEL")
+    VIEWMODEL("VIEWMODEL"),
+    NAVIGATION("NAVIGATION")
 }

@@ -7,10 +7,15 @@ sealed interface PostIntent {
     data class UpdateCurrentId(val postId: Int) : PostIntent
     data class FetchFilteredPosts(val query: Int?) : PostIntent
     data class AddLog(val log: String) : PostIntent
-    data class SavePost(val post: PostObject) : PostIntent
+    object SavePost : PostIntent
     data class UpdateRestoredPost(val restoredPost: PostObject?) : PostIntent
     data class UpdateFilterType(val filterType: FilterType) : PostIntent
     data class UpdateLoadingState(val isLoading: Boolean) : PostIntent
     data class FetchPostOnId(val postId: Int) : PostIntent
+    data class UpdatePostFormFlag(val postFormIsOpen: Boolean) : PostIntent
+    data class UpdateUserTitle(val userTitle: String) : PostIntent
+    data class UpdateUserBody(val userBody: String) : PostIntent
+    data class UpdateUserId(val userId: String) : PostIntent
+    object ClearUserForm : PostIntent
 
 }
