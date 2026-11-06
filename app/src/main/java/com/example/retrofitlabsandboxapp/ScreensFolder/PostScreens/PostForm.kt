@@ -146,7 +146,7 @@ fun PostForm(
                         && state.userId.isNotBlank()
                     ) {
                         if (state.userId.toIntOrNull() in 1..10) {
-                            onIntent(PostIntent.SavePost)
+                            onIntent(PostIntent.CreateUserPost)
                             onIntent(PostIntent.UpdatePostFormFlag(false))
                             onIntent(PostIntent.ClearUserForm)
                         } else {

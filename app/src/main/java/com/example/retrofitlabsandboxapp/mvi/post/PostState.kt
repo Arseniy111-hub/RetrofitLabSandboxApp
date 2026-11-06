@@ -1,16 +1,16 @@
 package com.example.retrofitlabsandboxapp.mvi.post
 
 import com.example.retrofitlabsandboxapp.NavigationFolder.FilterType
+import com.example.retrofitlabsandboxapp.RetrofidFolder.PostWithSendingStatus
 import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostObject
 
 data class PostState(
-    val currentPostId: Int = -1,
     val filterType: FilterType = FilterType.All,
     val userId: String = "",
     val userTitle: String = "",
     val userBody: String = "",
     val currentExceptions: List<String> = emptyList(),
-    val userPosts: List<PostObject> = emptyList(),
+    val userPosts: List<PostWithSendingStatus> = emptyList(),
     val logs: List<String> = emptyList(),
     val posts: List<PostObject> = emptyList(),
     val restoredPost: PostObject? = null,

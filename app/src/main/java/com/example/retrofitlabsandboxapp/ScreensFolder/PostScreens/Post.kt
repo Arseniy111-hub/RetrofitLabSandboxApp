@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -21,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -144,10 +148,11 @@ fun Post(
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             verticalItemSpacing = 5.dp,
-            modifier = Modifier.padding(
+            modifier = Modifier
+                .padding(
                 horizontal = 10.dp,
                 vertical = paddingValues.calculateTopPadding()
-            ),
+                ),
             horizontalArrangement = Arrangement.spacedBy(5.dp)
 
         ) {
@@ -160,7 +165,8 @@ fun Post(
                                 onFullScreen(post.id)
                             }
                         )
-                        .size(width = 200.dp, height = 100.dp),
+                        .size(width = 200.dp, height = 100.dp)
+                        .animateItem(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
@@ -192,13 +198,27 @@ fun Post(
 
                 }
             }
+            if (state.userPosts.isNotEmpty()) {
+                item(
+                    span = StaggeredGridItemSpan.FullLine
+                ) {
+                    Column {
+                        Spacer(Modifier.height(16.dp))
+                        HorizontalDivider()
+                        Text("Мои посты", style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+            }
 
-            items(state.userPosts, key = { it.id }) { post ->
+
+            items(state.userPosts, key = { it.post.id }) { post ->
                 Card(
                     modifier = Modifier
+                        .animateItem()
                         .clickable(
                             onClick = {
-                                onFullScreen(post.id)
+                                onFullScreen(post.post.id)
+
                             }
                         )
                         .size(width = 200.dp, height = 100.dp),
@@ -212,18 +232,17 @@ fun Post(
                                 .fillMaxWidth()
                                 .padding(5.dp)
                         ) {
-                            Text("User id: " + post.userId.toString())
+                            Text("User id: " + post.post.userId.toString())
 
                         }
                         Box(
-
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(5.dp),
 
                             ) {
                             Text(
-                                "Title:\n" + post.title,
+                                "Title:\n" + post.post.title,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )

@@ -9,10 +9,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.retrofitlabsandboxapp.LogFormatter
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent
 import com.example.retrofitlabsandboxapp.mvi.post.PostState
 
@@ -24,6 +26,7 @@ fun LogsScreen(
     state: PostState,
     onIntent: (PostIntent) -> Unit
 ) {
+    val logs = LogFormatter.logsRepository.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -31,10 +34,11 @@ fun LogsScreen(
             )
         }
     ) { paddingValues ->
+
         LazyColumn(
             modifier = modifier.padding(paddingValues)
         ) {
-            items(state.logs) { log ->
+            items(logs.value) { log ->
                 Box(
                     modifier = Modifier.padding(vertical = 10.dp)
                 ) {

@@ -63,6 +63,7 @@ fun Navigation(
             )
         ) {
             val postId = it.arguments?.getInt("postId")
+
             LaunchedEffect(postId) {
                 if (postId != null) {
                     pvm.onIntent(PostIntent.FetchPostOnId(postId))
@@ -72,6 +73,7 @@ fun Navigation(
             }
 
             FullScreenPost(
+                postId = postId,
                 onIntent = { intent -> pvm.onIntent(intent) },
                 state = ps.value,
                 onBack = { navController.popBackStack() }
