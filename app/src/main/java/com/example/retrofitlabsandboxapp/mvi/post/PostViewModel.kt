@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 class PostViewModel : ViewModel() {
     private var filteredPostsJob: Job? = null
     private var openPostJob: Job? = null
-    private var createPostJob: Job? = null
     private val _postState = MutableStateFlow(PostState())
     val postState = _postState.asStateFlow()
 //    private val _postsState = MutableStateFlow(emptyList<PostObject>())
@@ -48,6 +47,33 @@ class PostViewModel : ViewModel() {
             )
         }
     }
+
+    private fun sendPost(userPost: PostWithSendingStatus) {
+        viewModelScope.launch {
+            delay(1500L) // Специальная задержка, чтобы было видно статус SENDING
+            try {
+                val response = RetrofitInstance.api.createPost(userPost.post)
+                if (response.isSuccessful) {
+                    updateSendingState(userPost, SyncStatus.SYNCED)
+                    writeLog(
+                        "was successful created post: ${response.body().toString()}." +
+                                "Code: ${response.code()}", Tags.VIEWMODEL
+                    )
+                } else {
+                    updateSendingState(userPost, SyncStatus.FAILED)
+                    writeLog("response isn't successful", Tags.VIEWMODEL)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                updateSendingState(userPost, SyncStatus.FAILED)
+                writeLog(e.message.toString(), Tags.VIEWMODEL)
+
+            }
+
+
+        }
+    }
     fun onIntent(intent: PostIntent) {
         when (intent) {
 
@@ -65,8 +91,6 @@ class PostViewModel : ViewModel() {
                     }
                     val query: Int? = intent.query
                     try {
-
-
                         val response = RetrofitInstance.api.searchPost(query)
 
                         if (response.isSuccessful) {
@@ -137,33 +161,7 @@ class PostViewModel : ViewModel() {
                         userPosts = it.userPosts + userPost
                     )
                 }
-                createPostJob?.cancel()
-                createPostJob = viewModelScope.launch {
-
-                    try {
-                        val response = RetrofitInstance.api.createPost(userPost.post)
-                        if (response.isSuccessful) {
-                            updateSendingState(userPost, SyncStatus.SYNCED)
-                            writeLog(
-                                "was successful created post: ${response.body().toString()}." +
-                                        "Code: ${response.code()}", Tags.VIEWMODEL
-                            )
-                        } else {
-                            updateSendingState(userPost, SyncStatus.FAILED)
-                            writeLog("response isn't successful", Tags.VIEWMODEL)
-                        }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        updateSendingState(userPost, SyncStatus.FAILED)
-                        writeLog(e.message.toString(), Tags.VIEWMODEL)
-
-                    }
-
-
-                }
-
-
+                sendPost(userPost)
             }
 
             is UpdateRestoredPost -> {
@@ -285,38 +283,8 @@ class PostViewModel : ViewModel() {
             }
 
             is PostIntent.RestartSendingFailedPost -> {
-                viewModelScope.launch {
-                    val userPost = intent.post
-                    delay(1000L)
-                    try {
-                        val response = RetrofitInstance.api.createPost(userPost.post)
-                        if (response.isSuccessful) {
-                            updateSendingState(userPost, SyncStatus.SYNCED)
-                            writeLog(
-                                "was successful created post: ${response.body().toString()}." +
-                                        "Code: ${response.code()}", Tags.VIEWMODEL
-                            )
-                        } else {
-                            updateSendingState(userPost, SyncStatus.FAILED)
-                            writeLog("response isn't successful", Tags.VIEWMODEL)
-                        }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        writeLog(e.message.toString(), Tags.VIEWMODEL)
-                        onIntent(UpdateLoadingState(false))
-                        _postState.update {
-                            it.copy(errorMessage = e.message.toString())
-                        }
-
-
-                    } finally {
-                        writeLog("Response was finished", Tags.VIEWMODEL)
-                    }
-
-                }
-
-
+                updateSendingState(intent.post, SyncStatus.SENDING)
+                sendPost(intent.post)
             }
         }
 
