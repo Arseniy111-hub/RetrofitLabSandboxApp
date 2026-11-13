@@ -22,13 +22,13 @@ import com.example.retrofitlabsandboxapp.writeLog
 
 @Composable
 fun Navigation(
-    pvm: PostViewModel,
-    ivm: ImageViewModel,
-    wim: WeatherViewModel,
+    postViewModel: PostViewModel,
+    imageViewModel: ImageViewModel,
+    weatherViewModel: WeatherViewModel,
     navController: NavHostController
 
 ) {
-    val ps = pvm.postState.collectAsStateWithLifecycle()
+    val ps = postViewModel.postState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -42,7 +42,7 @@ fun Navigation(
 
 
             Post(
-                onIntent = { intent -> pvm.onIntent(intent) },
+                onIntent = { intent -> postViewModel.onIntent(intent) },
                 state = ps.value,
                 onBack = { navController.popBackStack() },
                 onFullScreen = { id ->
@@ -66,7 +66,7 @@ fun Navigation(
 
             LaunchedEffect(postId) {
                 if (postId != null) {
-                    pvm.onIntent(PostIntent.FetchPostOnId(postId))
+                    postViewModel.onIntent(PostIntent.FetchPostOnId(postId))
                 } else {
                     writeLog("Post id is null", Tags.NAVIGATION)
                 }
@@ -74,9 +74,12 @@ fun Navigation(
 
             FullScreenPost(
                 postId = postId,
-                onIntent = { intent -> pvm.onIntent(intent) },
+                onIntent = { intent -> postViewModel.onIntent(intent) },
                 state = ps.value,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    navController.popBackStack()
+                    postViewModel.onIntent(PostIntent.UpdateErrorMessage(""))
+                }
             )
         }
         composable(
@@ -94,7 +97,7 @@ fun Navigation(
         ) {
             LogsScreen(
                 onBack = { navController.popBackStack() },
-                onIntent = { pvm.onIntent(it) },
+                onIntent = { postViewModel.onIntent(it) },
                 state = ps.value
             )
         }

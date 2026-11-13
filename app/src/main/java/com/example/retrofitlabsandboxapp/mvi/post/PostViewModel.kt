@@ -10,6 +10,7 @@ import com.example.retrofitlabsandboxapp.Tags
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.AddLog
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.CreateUserPost
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.FetchFilteredPosts
+import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateErrorMessage
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateFilterType
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateLoadingState
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateRestoredPost
@@ -31,6 +32,7 @@ class PostViewModel : ViewModel() {
 //        val postsState = _postState.asStateFlow()
 
     var countId: Int = 0
+
     private fun updateSendingState(
         post: PostWithSendingStatus,
         status: SyncStatus
@@ -47,7 +49,6 @@ class PostViewModel : ViewModel() {
             )
         }
     }
-
     private fun sendPost(userPost: PostWithSendingStatus) {
         viewModelScope.launch {
             delay(1500L) // Специальная задержка, чтобы было видно статус SENDING
@@ -76,17 +77,16 @@ class PostViewModel : ViewModel() {
     }
     fun onIntent(intent: PostIntent) {
         when (intent) {
-
-
             is FetchFilteredPosts -> {
                 if (filteredPostsJob != null) {
                     filteredPostsJob?.cancel()
                 }
+                onIntent(UpdateErrorMessage(""))
                 filteredPostsJob = viewModelScope.launch {
 
                     onIntent(UpdateLoadingState(true))
                     _postState.update {
-                        it.copy(posts = emptyList(), errorMessage = "")
+                        it.copy(posts = emptyList())
 
                     }
                     val query: Int? = intent.query
@@ -108,10 +108,8 @@ class PostViewModel : ViewModel() {
 
                         } else {
                             onIntent(UpdateLoadingState(false))
-                            writeLog("Response is not successful", Tags.VIEWMODEL)
-                            _postState.update {
-                                it.copy(errorMessage = "Response is not successful")
-                            }
+                            writeLog(response.code().toString(), Tags.VIEWMODEL)
+                            onIntent(UpdateErrorMessage(response.code().toString()))
 
 
                         }
@@ -120,9 +118,7 @@ class PostViewModel : ViewModel() {
                     } catch (e: Exception) {
                         writeLog(e.message.toString(), Tags.VIEWMODEL)
                         onIntent(UpdateLoadingState(false))
-                        _postState.update {
-                            it.copy(errorMessage = e.message.toString())
-                        }
+                        onIntent(UpdateErrorMessage(e.message.toString()))
 
 
                     } finally {
@@ -188,6 +184,7 @@ class PostViewModel : ViewModel() {
 
             is PostIntent.FetchPostOnId -> {
                 openPostJob?.cancel()
+                onIntent(UpdateErrorMessage(""))
 
                 // Отрицательный id — это фиктивный пост
                 if (intent.postId < 0) {
@@ -206,9 +203,11 @@ class PostViewModel : ViewModel() {
                 }
 
                 openPostJob = viewModelScope.launch {
-                    delay(300L) //Специальная задержка для демонстративности
+                    delay(1000L) //Специальная задержка для демонстративности
                     try {
+
                         val response = RetrofitInstance.api.openPost(intent.postId)
+
                         if (response.isSuccessful) {
 
                             onIntent(UpdateLoadingState(false))
@@ -217,10 +216,8 @@ class PostViewModel : ViewModel() {
                             }
                         } else {
                             onIntent(UpdateLoadingState(false))
-                            writeLog("Response is not successful", Tags.VIEWMODEL)
-                            _postState.update {
-                                it.copy(errorMessage = "Response is not successful")
-                            }
+                            writeLog(response.code().toString(), Tags.VIEWMODEL)
+                            onIntent(UpdateErrorMessage(response.code().toString()))
 
 
                         }
@@ -229,9 +226,7 @@ class PostViewModel : ViewModel() {
                     } catch (e: Exception) {
                         writeLog(e.message.toString(), Tags.VIEWMODEL)
                         onIntent(UpdateLoadingState(false))
-                        _postState.update {
-                            it.copy(errorMessage = e.message.toString())
-                        }
+                        onIntent(UpdateErrorMessage(e.message.toString()))
 
 
                     } finally {
@@ -286,9 +281,15 @@ class PostViewModel : ViewModel() {
                 updateSendingState(intent.post, SyncStatus.SENDING)
                 sendPost(intent.post)
             }
+
+            is UpdateErrorMessage -> {
+                _postState.update {
+                    it.copy(errorMessage = intent.errorMessage)
+                }
+            }
         }
 
     }
-        }
+}
 
 

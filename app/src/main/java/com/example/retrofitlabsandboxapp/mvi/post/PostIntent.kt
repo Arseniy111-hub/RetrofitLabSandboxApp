@@ -19,5 +19,6 @@ sealed interface PostIntent {
     data class UpdateUserId(val userId: String) : PostIntent
     object ClearUserForm : PostIntent
     data class RestartSendingFailedPost(val post: PostWithSendingStatus) : PostIntent
+    data class UpdateErrorMessage(val errorMessage: String) : PostIntent
 
 }

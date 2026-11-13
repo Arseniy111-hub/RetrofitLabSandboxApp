@@ -1,6 +1,8 @@
 package com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,11 +39,12 @@ fun FullScreenPost(
     modifier: Modifier = Modifier,
     onIntent: (PostIntent) -> Unit,
     state: PostState,
-    onBack: () -> Boolean
+    onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val userPost = state.userPosts.find { it.post.id == postId }
     val post = userPost?.post ?: state.restoredPost
+    BackHandler { onBack() }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -65,12 +68,25 @@ fun FullScreenPost(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
+
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxSize()
             ) {
+                Box(
+                    contentAlignment = Alignment.TopCenter,
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    if (state.errorMessage.isNotBlank()) {
+                        Text(
+                            text = state.errorMessage
+                        )
+                    }
+                }
                 Box(contentAlignment = Alignment.Center) {
                     if (userPost?.syncStatus == SyncStatus.FAILED) {
                         IconButton(

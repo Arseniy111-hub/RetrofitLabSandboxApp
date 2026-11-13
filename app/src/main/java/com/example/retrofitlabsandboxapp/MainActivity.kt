@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         Navigation(
-                            pvm = pvm,
-                            ivm = ivm,
-                            wim = wim,
+                            postViewModel = pvm,
+                            imageViewModel = ivm,
+                            weatherViewModel = wim,
                             navController = navController
                         )
 
