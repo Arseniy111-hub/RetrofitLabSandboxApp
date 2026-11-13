@@ -8,17 +8,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.retrofitlabsandboxapp.ScreensFolder.Image
+import com.example.retrofitlabsandboxapp.Logs.Tags
+import com.example.retrofitlabsandboxapp.Logs.writeLog
 import com.example.retrofitlabsandboxapp.ScreensFolder.LogsScreen
 import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.FullScreenPost
 import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.Post
 import com.example.retrofitlabsandboxapp.ScreensFolder.Weather
-import com.example.retrofitlabsandboxapp.Tags
 import com.example.retrofitlabsandboxapp.mvi.image.ImageViewModel
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent
 import com.example.retrofitlabsandboxapp.mvi.post.PostViewModel
 import com.example.retrofitlabsandboxapp.mvi.weather.WeatherViewModel
-import com.example.retrofitlabsandboxapp.writeLog
 
 @Composable
 fun Navigation(
@@ -85,7 +84,7 @@ fun Navigation(
         composable(
             route = Screens.Image.route
         ) {
-            Image()
+            // Image()
         }
         composable(
             route = Screens.Weather.route

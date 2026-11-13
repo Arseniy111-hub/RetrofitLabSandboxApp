@@ -1,4 +1,4 @@
-package com.example.retrofitlabsandboxapp
+package com.example.retrofitlabsandboxapp.Logs
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

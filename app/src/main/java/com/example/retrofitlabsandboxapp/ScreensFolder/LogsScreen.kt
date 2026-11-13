@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.retrofitlabsandboxapp.LogFormatter
+import com.example.retrofitlabsandboxapp.Logs.LogFormatter
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent
 import com.example.retrofitlabsandboxapp.mvi.post.PostState
 

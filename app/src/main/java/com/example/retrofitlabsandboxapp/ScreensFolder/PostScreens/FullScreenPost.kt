@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.retrofitlabsandboxapp.RetrofidFolder.SyncStatus
+import com.example.retrofitlabsandboxapp.RetrofidFolder.post.SyncStatus
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent
 import com.example.retrofitlabsandboxapp.mvi.post.PostState
 

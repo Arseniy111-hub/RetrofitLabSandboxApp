@@ -2,11 +2,12 @@ package com.example.retrofitlabsandboxapp.mvi.post
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.retrofitlabsandboxapp.RetrofidFolder.PostWithSendingStatus
+import com.example.retrofitlabsandboxapp.Logs.Tags
+import com.example.retrofitlabsandboxapp.Logs.writeLog
 import com.example.retrofitlabsandboxapp.RetrofidFolder.RetrofitInstance
-import com.example.retrofitlabsandboxapp.RetrofidFolder.SyncStatus
 import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostObject
-import com.example.retrofitlabsandboxapp.Tags
+import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostWithSendingStatus
+import com.example.retrofitlabsandboxapp.RetrofidFolder.post.SyncStatus
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.AddLog
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.CreateUserPost
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.FetchFilteredPosts
@@ -14,7 +15,6 @@ import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateErrorMessage
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateFilterType
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateLoadingState
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent.UpdateRestoredPost
-import com.example.retrofitlabsandboxapp.writeLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -53,22 +53,22 @@ class PostViewModel : ViewModel() {
         viewModelScope.launch {
             delay(1500L) // Специальная задержка, чтобы было видно статус SENDING
             try {
-                val response = RetrofitInstance.api.createPost(userPost.post)
+                val response = RetrofitInstance.postApi.createPost(userPost.post)
                 if (response.isSuccessful) {
                     updateSendingState(userPost, SyncStatus.SYNCED)
                     writeLog(
                         "was successful created post: ${response.body().toString()}." +
-                                "Code: ${response.code()}", Tags.VIEWMODEL
+                                "Code: ${response.code()}", Tags.POST_VIEWMODEL
                     )
                 } else {
                     updateSendingState(userPost, SyncStatus.FAILED)
-                    writeLog("response isn't successful", Tags.VIEWMODEL)
+                    writeLog("response isn't successful", Tags.POST_VIEWMODEL)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 updateSendingState(userPost, SyncStatus.FAILED)
-                writeLog(e.message.toString(), Tags.VIEWMODEL)
+                writeLog(e.message.toString(), Tags.POST_VIEWMODEL)
 
             }
 
@@ -91,11 +91,11 @@ class PostViewModel : ViewModel() {
                     }
                     val query: Int? = intent.query
                     try {
-                        val response = RetrofitInstance.api.searchPost(query)
+                        val response = RetrofitInstance.postApi.searchPost(query)
 
                         if (response.isSuccessful) {
                             writeLog(
-                                "Response is successful", Tags.VIEWMODEL
+                                "Response is successful", Tags.POST_VIEWMODEL
                             )
 
                             onIntent(UpdateLoadingState(false))
@@ -108,7 +108,7 @@ class PostViewModel : ViewModel() {
 
                         } else {
                             onIntent(UpdateLoadingState(false))
-                            writeLog(response.code().toString(), Tags.VIEWMODEL)
+                            writeLog(response.code().toString(), Tags.POST_VIEWMODEL)
                             onIntent(UpdateErrorMessage(response.code().toString()))
 
 
@@ -116,13 +116,13 @@ class PostViewModel : ViewModel() {
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        writeLog(e.message.toString(), Tags.VIEWMODEL)
+                        writeLog(e.message.toString(), Tags.POST_VIEWMODEL)
                         onIntent(UpdateLoadingState(false))
                         onIntent(UpdateErrorMessage(e.message.toString()))
 
 
                     } finally {
-                        writeLog("Response was finished", Tags.VIEWMODEL)
+                        writeLog("Response was finished", Tags.POST_VIEWMODEL)
 
 
                     }
@@ -206,7 +206,7 @@ class PostViewModel : ViewModel() {
                     delay(1000L) //Специальная задержка для демонстративности
                     try {
 
-                        val response = RetrofitInstance.api.openPost(intent.postId)
+                        val response = RetrofitInstance.postApi.openPost(intent.postId)
 
                         if (response.isSuccessful) {
 
@@ -216,7 +216,7 @@ class PostViewModel : ViewModel() {
                             }
                         } else {
                             onIntent(UpdateLoadingState(false))
-                            writeLog(response.code().toString(), Tags.VIEWMODEL)
+                            writeLog(response.code().toString(), Tags.POST_VIEWMODEL)
                             onIntent(UpdateErrorMessage(response.code().toString()))
 
 
@@ -224,13 +224,13 @@ class PostViewModel : ViewModel() {
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        writeLog(e.message.toString(), Tags.VIEWMODEL)
+                        writeLog(e.message.toString(), Tags.POST_VIEWMODEL)
                         onIntent(UpdateLoadingState(false))
                         onIntent(UpdateErrorMessage(e.message.toString()))
 
 
                     } finally {
-                        writeLog("Response was finished", Tags.VIEWMODEL)
+                        writeLog("Response was finished", Tags.POST_VIEWMODEL)
                     }
 
                 }
