@@ -8,25 +8,27 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.retrofitlabsandboxapp.ScreensFolder.FullScreenPost
 import com.example.retrofitlabsandboxapp.ScreensFolder.Image
 import com.example.retrofitlabsandboxapp.ScreensFolder.LogsScreen
-import com.example.retrofitlabsandboxapp.ScreensFolder.Post
+import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.FullScreenPost
+import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.Post
 import com.example.retrofitlabsandboxapp.ScreensFolder.Weather
+import com.example.retrofitlabsandboxapp.Tags
 import com.example.retrofitlabsandboxapp.mvi.image.ImageViewModel
 import com.example.retrofitlabsandboxapp.mvi.post.PostIntent
 import com.example.retrofitlabsandboxapp.mvi.post.PostViewModel
 import com.example.retrofitlabsandboxapp.mvi.weather.WeatherViewModel
+import com.example.retrofitlabsandboxapp.writeLog
 
 @Composable
 fun Navigation(
-    pvm: PostViewModel,
-    ivm: ImageViewModel,
-    wim: WeatherViewModel,
+    postViewModel: PostViewModel,
+    imageViewModel: ImageViewModel,
+    weatherViewModel: WeatherViewModel,
     navController: NavHostController
 
 ) {
-    val ps = pvm.ps.collectAsStateWithLifecycle()
+    val ps = postViewModel.postState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -40,7 +42,7 @@ fun Navigation(
 
 
             Post(
-                onIntent = { intent -> pvm.onIntent(intent) },
+                onIntent = { intent -> postViewModel.onIntent(intent) },
                 state = ps.value,
                 onBack = { navController.popBackStack() },
                 onFullScreen = { id ->
@@ -61,14 +63,23 @@ fun Navigation(
             )
         ) {
             val postId = it.arguments?.getInt("postId")
+
             LaunchedEffect(postId) {
-                pvm.onIntent(PostIntent.FetchPostOnId(postId ?: -1))
+                if (postId != null) {
+                    postViewModel.onIntent(PostIntent.FetchPostOnId(postId))
+                } else {
+                    writeLog("Post id is null", Tags.NAVIGATION)
+                }
             }
 
             FullScreenPost(
-                onIntent = { intent -> pvm.onIntent(intent) },
+                postId = postId,
+                onIntent = { intent -> postViewModel.onIntent(intent) },
                 state = ps.value,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    navController.popBackStack()
+                    postViewModel.onIntent(PostIntent.UpdateErrorMessage(""))
+                }
             )
         }
         composable(
@@ -86,7 +97,7 @@ fun Navigation(
         ) {
             LogsScreen(
                 onBack = { navController.popBackStack() },
-                onIntent = { pvm.onIntent(it) },
+                onIntent = { postViewModel.onIntent(it) },
                 state = ps.value
             )
         }
