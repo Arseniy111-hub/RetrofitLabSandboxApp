@@ -1,8 +1,8 @@
 package com.example.retrofitlabsandboxapp.mvi.post
 
 import com.example.retrofitlabsandboxapp.NavigationFolder.FilterType
-import com.example.retrofitlabsandboxapp.RetrofidFolder.PostWithSendingStatus
 import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostObject
+import com.example.retrofitlabsandboxapp.RetrofidFolder.post.PostWithSendingStatus
 
 sealed interface PostIntent {
 
