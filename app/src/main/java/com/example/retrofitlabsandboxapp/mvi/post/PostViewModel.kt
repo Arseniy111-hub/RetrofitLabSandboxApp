@@ -27,7 +27,7 @@ class PostViewModel : ViewModel() {
     private var filteredPostsJob: Job? = null
     private var openPostJob: Job? = null
     private val _postState = MutableStateFlow(PostState())
-    val postState = _postState.asStateFlow()
+    val state = _postState.asStateFlow()
 //    private val _postsState = MutableStateFlow(emptyList<PostObject>())
 //        val postsState = _postState.asStateFlow()
 

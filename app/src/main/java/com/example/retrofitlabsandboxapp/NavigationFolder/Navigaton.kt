@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.retrofitlabsandboxapp.Logs.Tags
 import com.example.retrofitlabsandboxapp.Logs.writeLog
+import com.example.retrofitlabsandboxapp.ScreensFolder.Image
 import com.example.retrofitlabsandboxapp.ScreensFolder.LogsScreen
 import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.FullScreenPost
 import com.example.retrofitlabsandboxapp.ScreensFolder.PostScreens.Post
@@ -27,7 +28,8 @@ fun Navigation(
     navController: NavHostController
 
 ) {
-    val ps = postViewModel.postState.collectAsStateWithLifecycle()
+    val postState = postViewModel.state.collectAsStateWithLifecycle()
+    val imageState = imageViewModel.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -42,7 +44,7 @@ fun Navigation(
 
             Post(
                 onIntent = { intent -> postViewModel.onIntent(intent) },
-                state = ps.value,
+                state = postState.value,
                 onBack = { navController.popBackStack() },
                 onFullScreen = { id ->
                     navController.navigate(
@@ -74,7 +76,7 @@ fun Navigation(
             FullScreenPost(
                 postId = postId,
                 onIntent = { intent -> postViewModel.onIntent(intent) },
-                state = ps.value,
+                state = postState.value,
                 onBack = {
                     navController.popBackStack()
                     postViewModel.onIntent(PostIntent.UpdateErrorMessage(""))
@@ -84,7 +86,12 @@ fun Navigation(
         composable(
             route = Screens.Image.route
         ) {
-            // Image()
+            Image(
+                state = imageState.value,
+                onIntent = { imageIntent ->
+                    imageViewModel.onIntent(imageIntent)
+                }
+            )
         }
         composable(
             route = Screens.Weather.route
@@ -97,7 +104,7 @@ fun Navigation(
             LogsScreen(
                 onBack = { navController.popBackStack() },
                 onIntent = { postViewModel.onIntent(it) },
-                state = ps.value
+                state = postState.value
             )
         }
 

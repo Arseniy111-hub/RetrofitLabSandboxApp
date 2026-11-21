@@ -8,6 +8,7 @@ import com.example.retrofitlabsandboxapp.RetrofidFolder.RetrofitInstance
 import com.example.retrofitlabsandboxapp.RetrofidFolder.image.PixabayImage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,6 +27,67 @@ class ImageViewModel : ViewModel() {
             )
         }
     }
+    private fun fetchImages(query: String, page: Int) {
+        if (query.isBlank()) return
+
+
+        job?.cancel()
+        _state.update {
+            it.copy(
+                query = query,
+                images = emptyList(),
+                isLoading = true,
+                isEmptySearch = false,
+                error = ""
+            )
+        }
+        job = viewModelScope.launch {
+            delay(1000L)
+            try {
+                val response = RetrofitInstance.imageApi.searchImages(query = query, pageNum = page)
+                if (response.isSuccessful) {
+                    if (response.body()?.hits == emptyList<PixabayImage>()) {
+                        _state.update {
+                            it.copy(
+                                error = "Nothing not find",
+                                isLoading = false
+
+                            )
+                        }
+                    } else {
+                        updateSearchResult(response.body()?.hits ?: emptyList())
+                        writeLog(response.isSuccessful.toString(), Tags.IMAGE_VIEWMODEL)
+                        writeLog(
+                            "Counter of fetched images equals ${response.body()?.hits?.count()}",
+                            Tags.IMAGE_VIEWMODEL
+                        )
+                    }
+
+                } else {
+                    writeLog(response.code().toString(), Tags.IMAGE_VIEWMODEL)
+                    _state.update {
+                        it.copy(
+                            error = response.code().toString(),
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: CancellationException) {
+                writeLog(e.message.toString(), Tags.IMAGE_VIEWMODEL)
+                throw e
+
+            } catch (e: Exception) {
+                writeLog(e.message.toString(), Tags.IMAGE_VIEWMODEL)
+                _state.update {
+                    it.copy(
+                        error = e.message.toString(),
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
 
     fun onIntent(intent: ImageIntent) {
 
@@ -40,47 +102,15 @@ class ImageViewModel : ViewModel() {
             }
 
             is ImageIntent.OnSearchQuery -> {
-                // Пустой запрос — ничего не делаем (пункт 4 ТЗ)
-                if (intent.query.isBlank()) return
-
-                job?.cancel()
                 _state.update {
                     it.copy(
-                        query = intent.query,
-                        images = emptyList(),
-                        isLoading = true,
-                        isEmptySearch = false,
-                        error = ""
+                        currentPage = 1
                     )
                 }
-                job = viewModelScope.launch {
-                    try {
-                        val response = RetrofitInstance.imageApi.searchImages(intent.query)
-                        if (response.isSuccessful) {
-                            updateSearchResult(response.body()?.hits ?: emptyList())
-                        } else {
-                            writeLog(response.code().toString(), Tags.IMAGE_VIEWMODEL)
-                            _state.update {
-                                it.copy(
-                                    error = response.code().toString(),
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    } catch (e: CancellationException) {
-                        writeLog(e.message.toString(), Tags.IMAGE_VIEWMODEL)
-                        throw e
-
-                    } catch (e: Exception) {
-                        writeLog(e.message.toString(), Tags.IMAGE_VIEWMODEL)
-                        _state.update {
-                            it.copy(
-                                error = e.message.toString(),
-                                isLoading = false
-                            )
-                        }
-                    }
-                }
+                fetchImages(
+                    intent.query,
+                    _state.value.currentPage
+                )
 
             }
 
@@ -96,6 +126,52 @@ class ImageViewModel : ViewModel() {
                 _state.update {
                     it.copy(
                         query = intent.query
+                    )
+                }
+            }
+
+            is ImageIntent.NextPage -> {
+                _state.update {
+                    it.copy(
+                        currentPage = intent.currentPage + 1
+                    )
+                }
+
+                fetchImages(
+                    _state.value.query,
+                    intent.currentPage + 1
+                )
+
+            }
+
+            is ImageIntent.PrevPage -> {
+                if (_state.value.currentPage > 1) {
+                    _state.update {
+                        it.copy(
+                            currentPage = intent.currentPage - 1
+                        )
+                    }
+
+                    fetchImages(
+                        _state.value.query,
+                        intent.currentPage - 1
+                    )
+
+                }
+
+            }
+
+            is ImageIntent.ManualPageInput -> {
+                _state.update {
+                    it.copy(
+                        currentPage = intent.currentPage,
+
+                        )
+                }
+                viewModelScope.launch {
+                    RetrofitInstance.imageApi.searchImages(
+                        query = _state.value.query,
+                        pageNum = _state.value.currentPage
                     )
                 }
             }

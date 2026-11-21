@@ -7,4 +7,7 @@ sealed interface ImageIntent {
     data class OnSearchQuery(val query: String) : ImageIntent
     data class SelectImage(val image: PixabayImage) : ImageIntent
     object CloseImage : ImageIntent
+    data class NextPage(val currentPage: Int) : ImageIntent
+    data class PrevPage(val currentPage: Int) : ImageIntent
+    data class ManualPageInput(val currentPage: Int) : ImageIntent
 }

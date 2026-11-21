@@ -13,6 +13,7 @@ interface ImageApi {
     suspend fun searchImages(
         @Query("q") query: String,
         @Query("key") key: String = BuildConfig.PIXABAY_API_KEY,
-        @Query("image_type") imageType: String = "photo"
+        @Query("image_type") imageType: String = "photo",
+        @Query("page") pageNum: Int = 1
     ): Response<PixabayWrapper>
 }

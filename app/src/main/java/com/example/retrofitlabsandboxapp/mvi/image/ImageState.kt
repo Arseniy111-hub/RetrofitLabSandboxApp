@@ -10,5 +10,5 @@ data class ImageState(
     val error: String = "",
     val images: List<PixabayImage> = emptyList(),
     val isEmptySearch: Boolean = false,
-
+    val currentPage: Int = 1
 )
