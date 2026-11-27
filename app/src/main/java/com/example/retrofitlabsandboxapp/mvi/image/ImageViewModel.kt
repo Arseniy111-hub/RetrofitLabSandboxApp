@@ -86,6 +86,13 @@ class ImageViewModel : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch {
+            val response = RetrofitInstance.httpBinApi.httpBinApi("Test_header_sending")
+            if (response.isSuccessful) {
+                val answer = response.body()?.headers?.get("X-Custom-Header")
+                writeLog("httpbin вернул заголовок: $answer", Tags.IMAGE_VIEWMODEL)
+            }
+        }
     }
 
 
