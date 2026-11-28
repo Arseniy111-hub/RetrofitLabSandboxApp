@@ -18,6 +18,26 @@ class ImageViewModel : ViewModel() {
     private var job: Job? = null
     private val _state = MutableStateFlow(ImageState())
     val state = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.httpBinApi.getHeader("Test_header_sending")
+                if (response.isSuccessful) {
+                    val answer = response.body()?.headers?.get("X-Custom-Header")
+                    writeLog("httpbin вернул заголовок: $answer", Tags.IMAGE_VIEWMODEL)
+                } else {
+                    writeLog(response.code().toString(), Tags.IMAGE_VIEWMODEL)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                writeLog(e.message.toString(), Tags.IMAGE_VIEWMODEL)
+            }
+
+        }
+
+    }
     private fun updateSearchResult(images: List<PixabayImage>) {
         _state.update {
             it.copy(
