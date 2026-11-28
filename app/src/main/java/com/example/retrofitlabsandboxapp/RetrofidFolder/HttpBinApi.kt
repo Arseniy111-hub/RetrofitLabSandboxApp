@@ -7,5 +7,5 @@ import retrofit2.http.Header
 
 interface HttpBinApi {
     @GET("headers")
-    suspend fun httpBinApi(@Header("X-Custom-Header") myHeader: String): Response<DTO>
+    suspend fun getHeader(@Header("X-Custom-Header") myHeader: String): Response<HeaderData>
 }

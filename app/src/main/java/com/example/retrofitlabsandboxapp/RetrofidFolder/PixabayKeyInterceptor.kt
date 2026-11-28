@@ -9,7 +9,7 @@ class PixabayKeyInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
         val originalHttpUrl = original.url
-        if ((originalHttpUrl.host.contains("pixabay.com"))) {
+        if ((originalHttpUrl.host == "pixabay.com")) {
             val requestBuilder = original.newBuilder()
                 .url(
                     originalHttpUrl.newBuilder()
